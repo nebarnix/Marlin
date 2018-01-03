@@ -477,18 +477,30 @@ inline void line_to_current(AxisEnum axis) {
 
   static void lcd_sdcard_stop() {
     quickStop();
-    enqueue_and_echo_commands_P(PSTR("G28"));//THIS CODE ADDED BY PBNJ
+  	//clear_command_queue();
+  	//enqueue_and_echo_commands_P(PSTR("G28")); //WHY DOES THIS NOT WORK
+  	
+  	//enqueue_and_echo_commands_P(PSTR("M117 Abort Print\nM25\nG91\nG0 Z10\nG90\nG0 X0 Y140\nM400\n"));
+    //enqueue_and_echo_commands_P(PSTR("M117 Abort Print\nM25\nG91\nG0 Z10\nG90\nG28\nM400\n"));
+    
     card.sdprinting = false;
     card.closefile();
-    autotempShutdown();
-    cancel_heatup = true;
-    lcd_setstatus(MSG_PRINT_ABORTED, true);
     
+    //enqueue_and_echo_commands_P(PSTR("G28"));//THIS CODE ADDED BY PBNJ
+    
+    autotempShutdown(); //only an autotemp thing
     setTargetHotend0(0); //THIS CODE ADDED BY PBNJ
     setTargetHotend1(0);//THIS CODE ADDED BY PBNJ
     setTargetHotend2(0);//THIS CODE ADDED BY PBNJ
     setTargetBed(0);//THIS CODE ADDED BY PBNJ
+    cancel_heatup = true;
+    lcd_setstatus(MSG_PRINT_ABORTED, true);
+   
     
+    //enqueue_and_echo_commands_P(PSTR("G28"));
+    //enqueue_and_echo_commands_P(PSTR("G28"));
+    //enqueue_and_echo_commands_P(PSTR("G28\n"));
+    //enqueue_and_echo_commands_P(PSTR("G1 Z100"));
   }
 
 #endif //SDSUPPORT
@@ -1342,8 +1354,8 @@ static void lcd_move_menu() {
   MENU_ITEM(submenu, MSG_MOVE_1MM, lcd_move_menu_1mm);
   MENU_ITEM(submenu, MSG_MOVE_01MM, lcd_move_menu_01mm);
   //nebarnix Load and Unload is here, burried to prevent accidents
-  MENU_ITEM(gcode, "Unload Extruder", PSTR("G91\nG1 E5 F200\nG1 E-50 F1000\nG1 E-250 F1500\nG1 E-250\nG1 E-75\nG90"));
-  MENU_ITEM(gcode, "Load Extruder", PSTR("G91\nG1 E250 F1500\nG1 E250\nG1 E72 F1000\nG1 E80 F150\nG90"));
+  MENU_ITEM(gcode, "Unload Extruder", PSTR("G91\nG1 E7 F200\nG1 E-50 F1000\nG1 E-250 F1500\nG1 E-250\nG1 E-185\nG90"));
+  MENU_ITEM(gcode, "Load Extruder", PSTR("G91\nG1 E250 F1500\nG1 E250\nG1 E90\nG1 E80 F1000\nG1 E90 F150\nG90"));
   //TODO:X,Y,Z,E
   END_MENU();
 }
