@@ -477,11 +477,18 @@ inline void line_to_current(AxisEnum axis) {
 
   static void lcd_sdcard_stop() {
     quickStop();
+    enqueue_and_echo_commands_P(PSTR("G28"));//THIS CODE ADDED BY PBNJ
     card.sdprinting = false;
     card.closefile();
     autotempShutdown();
     cancel_heatup = true;
     lcd_setstatus(MSG_PRINT_ABORTED, true);
+    
+    setTargetHotend0(0); //THIS CODE ADDED BY PBNJ
+    setTargetHotend1(0);//THIS CODE ADDED BY PBNJ
+    setTargetHotend2(0);//THIS CODE ADDED BY PBNJ
+    setTargetBed(0);//THIS CODE ADDED BY PBNJ
+    
   }
 
 #endif //SDSUPPORT
@@ -1134,8 +1141,9 @@ static void lcd_prepare_menu() {
   //
   #if TEMP_SENSOR_0 != 0
     #if TEMP_SENSOR_1 != 0 || TEMP_SENSOR_2 != 0 || TEMP_SENSOR_3 != 0 || TEMP_SENSOR_BED != 0
-      MENU_ITEM(submenu, MSG_PREHEAT_PLA, lcd_preheat_pla_menu);
-      MENU_ITEM(submenu, MSG_PREHEAT_ABS, lcd_preheat_abs_menu);
+       MENU_ITEM(function, MSG_PREHEAT_PLA, lcd_preheat_pla0); //NEBARNIX no use to have a whole submenu for a single item  
+      //MENU_ITEM(submenu, MSG_PREHEAT_PLA, lcd_preheat_pla_menu);
+      //MENU_ITEM(submenu, MSG_PREHEAT_ABS, lcd_preheat_abs_menu); //NEBARNIX removed ABS option
     #else
       MENU_ITEM(function, MSG_PREHEAT_PLA, lcd_preheat_pla0);
       MENU_ITEM(function, MSG_PREHEAT_ABS, lcd_preheat_abs0);
@@ -1333,6 +1341,9 @@ static void lcd_move_menu() {
 
   MENU_ITEM(submenu, MSG_MOVE_1MM, lcd_move_menu_1mm);
   MENU_ITEM(submenu, MSG_MOVE_01MM, lcd_move_menu_01mm);
+  //nebarnix Load and Unload is here, burried to prevent accidents
+  MENU_ITEM(gcode, "Unload Extruder", PSTR("G91\nG1 E5 F200\nG1 E-50 F1000\nG1 E-250 F1500\nG1 E-250\nG1 E-75\nG90"));
+  MENU_ITEM(gcode, "Load Extruder", PSTR("G91\nG1 E250 F1500\nG1 E250\nG1 E72 F1000\nG1 E80 F150\nG90"));
   //TODO:X,Y,Z,E
   END_MENU();
 }
@@ -2300,8 +2311,8 @@ void lcd_update() {
     // Return to Status Screen after a timeout
     if (currentMenu == lcd_status_screen || defer_return_to_status)
       return_to_status_ms = ms + LCD_TIMEOUT_TO_STATUS;
-    else if (ELAPSED(ms, return_to_status_ms))
-      lcd_return_to_status();
+    else if (ELAPSED(ms, return_to_status_ms));
+      //lcd_return_to_status(); //NEBARNIX disable return to menu --  menu can be wonky on a deltaprintr....
 
   #endif // ULTIPANEL
 
